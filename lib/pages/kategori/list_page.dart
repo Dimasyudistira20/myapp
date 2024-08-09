@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/kategori_models.dart';
 import '../../services/kategori_service.dart';
-import 'form_page.dart';
-
+import 'create_kategori_page.dart'; // Import halaman edit kategori
+import 'show_kategori_page.dart';
+import 'edit_kategori_page.dart';
 class KategoriPage extends StatefulWidget {
   @override
   _KategoriPageState createState() => _KategoriPageState();
@@ -30,9 +31,22 @@ class _KategoriPageState extends State<KategoriPage> {
       context,
       MaterialPageRoute(builder: (context) => FormKategoriPage()),
     );
-
     if (result == true) {
       _fetchKategori();
+    }
+  }
+
+  void _deleteKategori(int id) async {
+    bool deleted = await _kategoriService.deleteKategori(id);
+    if (deleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kategori berhasil dihapus')),
+      );
+      _fetchKategori();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus kategori')),
+      );
     }
   }
 
@@ -58,14 +72,14 @@ class _KategoriPageState extends State<KategoriPage> {
                   margin: EdgeInsets.all(10),
                   padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3), // changes position of shadow
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -80,6 +94,45 @@ class _KategoriPageState extends State<KategoriPage> {
                         ),
                       ),
                       SizedBox(height: 5),
+                      Text(kategori.slug.toString()),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.remove_red_eye),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ShowKategoriPage(kategori: kategori),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EditKategoriPage(kategori: kategori),
+                                ),
+                              ).then((result) {
+                                if (result == true) {
+                                  _fetchKategori();
+                                }
+                              });
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () => _deleteKategori(kategori.id!),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 );
